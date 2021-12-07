@@ -1,7 +1,7 @@
 from sqlalchemy import Table, Column, ForeignKey, Integer, String, Date
 from sqlalchemy.orm import relationship
 
-from .database import Base #Se importa el objeto Base desde el archivo database.py
+from database import Base
 
 
 has_category = Table('association', Base.metadata,

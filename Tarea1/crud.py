@@ -1,8 +1,14 @@
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.sqltypes import and_, Date
+from sqlalchemy.sql.sqltypes import Date
 
-from . import models, schemas
+import models
 
 
 def get_news(db: Session, date_from: Date, date_to: Date, category: str):
-    return db.query(models.News).filter(and_(models.News.between(date_from, date_to), models.News.categories == category)).all()
+    response = []
+    news = db.query(models.News).filter(models.News.date.between(date_from, date_to)).all()
+    for i in news:
+        if category in i.categories:
+            response.append(i)
+    return response
