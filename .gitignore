@@ -1,2 +1,4 @@
 *.pyc
 .vscode/settings.json
+Proyecto/bot_database/**
+Proyecto/discord_listener/.env
