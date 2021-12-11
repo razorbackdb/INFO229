@@ -30,6 +30,18 @@ def insert_data(cursor):
     ("Dragon",":dragon:", 100, 25, 500, 0);
     ''')
     cursor.execute("COMMIT;")
+    cursor.execute('''INSERT INTO monsters (name, emoji, atk, def, hp, selected) VALUES
+    ("Worm",":worm:", 10, 50, 100, 0);
+    ''')
+    cursor.execute("COMMIT;")
+    cursor.execute('''INSERT INTO monsters (name, emoji, atk, def, hp, selected) VALUES
+    ("Shark",":shark:", 50, 50, 250, 0);
+    ''')
+    cursor.execute("COMMIT;")
+    cursor.execute('''INSERT INTO monsters (name, emoji, atk, def, hp, selected) VALUES
+    ("Octopus",":octopus:", 25, 75, 300, 0);
+    ''')
+    cursor.execute("COMMIT;")
 
 
 #######################

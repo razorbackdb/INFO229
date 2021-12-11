@@ -1,3 +1,4 @@
+import random
 import mysql.connector
 import os
 import time
@@ -70,8 +71,9 @@ def callback(ch, method, properties, body):
         monster = cursor.fetchone()
 
         if monster == None:
+            r = random.randint(1, 4)
             cursor.execute(
-                f'''SELECT name, emoji, atk, def, hp FROM monsters WHERE id_monster=1;'''
+                f'''SELECT name, emoji, atk, def, hp FROM monsters WHERE id_monster={r};'''
             )
 
             for (name, emoji, atk, def_, hp) in cursor:
