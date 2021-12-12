@@ -86,7 +86,7 @@ def callback(ch, method, properties, body):
                                       routing_key="discord_writer",
                                       body=result)
                 cursor.execute(
-                    f'''UPDATE monsters SET selected=1 WHERE id_monster=1;'''
+                    f'''UPDATE monsters SET selected=1 WHERE id_monster={r};'''
                 )
 
                 db_connection.commit()
@@ -100,7 +100,63 @@ def callback(ch, method, properties, body):
             channel.basic_publish(exchange='cartero',
 									routing_key="discord_writer",
 									body=result)
+        
+        cursor.close()
 
+    if (arguments[0] == "!attack"):
+        db_connection = mysql.connector.connect(
+            user=DATABASE_USER,
+            host=DATABASE_IP,
+            port=DATABASE_PORT,
+            password=DATABASE_USER_PASSWORD)
+
+        cursor = db_connection.cursor()
+        cursor.execute(f"USE {DATABASE}")
+        cursor.execute(
+            f'''SELECT * FROM monsters WHERE selected=1;'''
+        )
+
+        monster = cursor.fetchone()
+
+        if monster == None:
+            result = "Llama un monstruo primero! Escribe !monster ..."
+            print(result)
+
+			########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+            print("send a new message to rabbitmq: " + result)
+            channel.basic_publish(exchange='cartero',
+									routing_key="discord_writer",
+									body=result)
+        else:
+            attack = random.randint(50, 100)
+            attack = attack - monster[4]
+            hp = monster[5] - attack
+
+            if(hp < 0):
+                cursor.execute(
+                        f'''UPDATE monsters SET hp={hp}, selected=0 WHERE id_monster={monster[0]};'''
+                    )
+                
+                db_connection.commit()
+
+                result = f"Has hecho {attack} puntos de daño! Ha muerto!"
+
+            else:
+                cursor.execute(
+                        f'''UPDATE monsters SET hp={hp} WHERE id_monster={monster[0]};'''
+                    )
+                
+                db_connection.commit()
+
+                result = f"Has hecho {attack} puntos de daño! Le quedan {hp} de vida ..."
+
+            ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+            print("send a new message to rabbitmq: " + result)
+            channel.basic_publish(exchange='cartero',
+                                    routing_key="discord_writer",
+                                    body=result)
+
+        cursor.close()
 
 channel.basic_consume(queue=queue_name,
                       on_message_callback=callback,
