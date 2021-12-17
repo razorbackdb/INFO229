@@ -65,7 +65,7 @@ def callback(ch, method, properties, body):
         cursor = db_connection.cursor()
         cursor.execute(f"USE {DATABASE}")
         cursor.execute(
-            f'''SELECT * FROM monsters WHERE selected=1;'''
+            f'''SELECT * FROM battles WHERE selected=1;'''
         )
 
         monster = cursor.fetchone()
@@ -77,7 +77,7 @@ def callback(ch, method, properties, body):
             )
 
             for (name, emoji, atk, def_, hp) in cursor:
-                result = emoji
+                result = f"{emoji}\nHa aparecido un {name}, haz algo!"
                 print(result)
 
                 ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
@@ -86,7 +86,9 @@ def callback(ch, method, properties, body):
                                       routing_key="discord_writer",
                                       body=result)
                 cursor.execute(
-                    f'''UPDATE monsters SET selected=1 WHERE id_monster={r};'''
+                    f'''INSERT INTO battles (name, emoji, atk, def, hp, selected) VALUES
+                        ("{name}", "{emoji}", {atk}, {def_}, {hp}, 1);
+                        '''
                 )
 
                 db_connection.commit()
@@ -95,12 +97,12 @@ def callback(ch, method, properties, body):
             result = "Ya hay un monstruo. Haz algo!"
             print(result)
 
-			########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+            ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
             print("send a new message to rabbitmq: " + result)
             channel.basic_publish(exchange='cartero',
-									routing_key="discord_writer",
-									body=result)
-        
+                                  routing_key="discord_writer",
+                                  body=result)
+
         cursor.close()
 
     if (arguments[0] == "!attack"):
@@ -113,7 +115,7 @@ def callback(ch, method, properties, body):
         cursor = db_connection.cursor()
         cursor.execute(f"USE {DATABASE}")
         cursor.execute(
-            f'''SELECT * FROM monsters WHERE selected=1;'''
+            f'''SELECT * FROM battles WHERE selected=1;'''
         )
 
         monster = cursor.fetchone()
@@ -122,41 +124,42 @@ def callback(ch, method, properties, body):
             result = "Llama un monstruo primero! Escribe !monster ..."
             print(result)
 
-			########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+            ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
             print("send a new message to rabbitmq: " + result)
             channel.basic_publish(exchange='cartero',
-									routing_key="discord_writer",
-									body=result)
+                                  routing_key="discord_writer",
+                                  body=result)
         else:
-            attack = random.randint(50, 100)
+            attack = random.randint(50, 150)
             attack = attack - monster[4]
             hp = monster[5] - attack
 
             if(hp < 0):
                 cursor.execute(
-                        f'''UPDATE monsters SET hp={hp}, selected=0 WHERE id_monster={monster[0]};'''
-                    )
-                
+                    f'''UPDATE battles SET hp={hp}, selected=0 WHERE id_battle={monster[0]};'''
+                )
+
                 db_connection.commit()
 
-                result = f"Has hecho {attack} puntos de daño! Ha muerto!"
+                result = f"{monster[2]}\nHas hecho {attack} puntos de daño! Ha muerto!"
 
             else:
                 cursor.execute(
-                        f'''UPDATE monsters SET hp={hp} WHERE id_monster={monster[0]};'''
-                    )
-                
+                    f'''UPDATE battles SET hp={hp} WHERE id_battle={monster[0]};'''
+                )
+
                 db_connection.commit()
 
-                result = f"Has hecho {attack} puntos de daño! Le quedan {hp} de vida ..."
+                result = f"{monster[2]}\nHas hecho {attack} puntos de daño! Le quedan {hp} de vida ..."
 
             ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
             print("send a new message to rabbitmq: " + result)
             channel.basic_publish(exchange='cartero',
-                                    routing_key="discord_writer",
-                                    body=result)
+                                  routing_key="discord_writer",
+                                  body=result)
 
         cursor.close()
+
 
 channel.basic_consume(queue=queue_name,
                       on_message_callback=callback,

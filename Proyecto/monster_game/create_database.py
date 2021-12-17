@@ -17,6 +17,16 @@ def create_database(db_connection, db_name, cursor):
 		hp INT,
         selected BOOL
 		);''')
+    
+    cursor.execute('''CREATE TABLE battles (
+		id_battle INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+		name VARCHAR(255),
+		emoji VARCHAR(255),
+		atk INT,
+		def INT,
+		hp INT,
+        selected BOOL
+		);''')
 
     cursor.execute("SET GLOBAL time_zone = 'UTC';")
     cursor.execute("SET SESSION time_zone = 'UTC';")

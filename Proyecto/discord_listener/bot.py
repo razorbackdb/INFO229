@@ -75,13 +75,13 @@ async def cumpleaños(ctx):
     print("send a new mesage to rabbitmq: "+message)
     channelMQ.basic_publish(exchange='cartero', routing_key="birthday", body=message)
 
-@bot.command(name='monster', help='Permite añadir el cumpleaño de un nuevo miembro de la GUILD que se pasa en parámetro. Ejemplo: !birthday MatthieuVernier 1985-02-13')
+@bot.command(name='monster', help='Llama un mosntruo para iniciar una batalla.')
 async def cumpleaños(ctx):
     message =  ctx.message.content
     print("send a new mesage to rabbitmq: "+message)
     channelMQ.basic_publish(exchange='cartero', routing_key="monster_game", body=message)
 
-@bot.command(name='attack', help='Permite añadir el cumpleaño de un nuevo miembro de la GUILD que se pasa en parámetro. Ejemplo: !birthday MatthieuVernier 1985-02-13')
+@bot.command(name='attack', help='Ataca a un monstruo para derrotarlo.')
 async def cumpleaños(ctx):
     message =  ctx.message.content
     print("send a new mesage to rabbitmq: "+message)
