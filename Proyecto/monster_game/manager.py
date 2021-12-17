@@ -160,6 +160,55 @@ def callback(ch, method, properties, body):
 
         cursor.close()
 
+    if (arguments[0] == "!flee"):
+        db_connection = mysql.connector.connect(
+            user=DATABASE_USER,
+            host=DATABASE_IP,
+            port=DATABASE_PORT,
+            password=DATABASE_USER_PASSWORD)
+
+        cursor = db_connection.cursor()
+        cursor.execute(f"USE {DATABASE}")
+        cursor.execute(
+            f'''SELECT * FROM battles WHERE selected=1;'''
+        )
+
+        monster = cursor.fetchone()
+
+        if monster == None:
+            result = "Llama un monstruo primero! Escribe !monster ..."
+            print(result)
+
+            ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+            print("send a new message to rabbitmq: " + result)
+            channel.basic_publish(exchange='cartero',
+                                    routing_key="discord_writer",
+                                    body=result)
+        else:
+            roll_user = random.randint(1, 10)
+            roll_monster = random.randint(1, 10)
+
+            if(roll_monster <= roll_user):
+                cursor.execute(
+                    f'''UPDATE battles SET selected=0 WHERE id_battle={monster[0]};'''
+                )
+
+                db_connection.commit()
+
+                result = f"Has escapado!"
+
+            else:
+                
+                result = f"No has escapado, la batalla continua!"
+
+            ########## PUBLICA EL RESULTADO COMO EVENTO EN RABBITMQ ##########
+            print("send a new message to rabbitmq: " + result)
+            channel.basic_publish(exchange='cartero',
+                                    routing_key="discord_writer",
+                                    body=result)
+
+    cursor.close()
+
 
 channel.basic_consume(queue=queue_name,
                       on_message_callback=callback,

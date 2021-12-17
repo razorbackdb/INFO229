@@ -87,6 +87,12 @@ async def cumpleaños(ctx):
     print("send a new mesage to rabbitmq: "+message)
     channelMQ.basic_publish(exchange='cartero', routing_key="monster_game", body=message)
 
+@bot.command(name='flee', help='Intenta arrancar del monstruo.')
+async def cumpleaños(ctx):
+    message =  ctx.message.content
+    print("send a new mesage to rabbitmq: "+message)
+    channelMQ.basic_publish(exchange='cartero', routing_key="monster_game", body=message)
+
 ############ CONSUMER ###############
 
 import threading
