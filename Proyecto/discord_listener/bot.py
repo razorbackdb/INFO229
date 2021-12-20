@@ -47,7 +47,7 @@ async def on_ready():
         print(channel)
         print(channel.id)
 
-    channel = bot.get_channel(294969427513049098)
+    channel = bot.get_channel(908505071887732768)
     await channel.send('¡Hola!')
 
 
@@ -122,7 +122,7 @@ def writer(bot):
     print(' [*] Waiting for messages. To exit press CTRL+C')
 
     async def write(message):
-        channel = bot.get_channel(294969427513049098)#913706828502814760
+        channel = bot.get_channel(908505071887732768)#913706828502814760
         await channel.send(message)
 
     def callback(ch, method, properties, body):
